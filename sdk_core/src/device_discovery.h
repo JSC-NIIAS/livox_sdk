@@ -35,8 +35,12 @@
 #include "comm/comm_port.h"
 #include "command_handler/command_channel.h"
 
-namespace livox {
+//=======================================================================================
 
+namespace livox
+{
+
+//=======================================================================================
 /**
  * DeviceDiscovery listens broadcast message from devices, and proceed handshake
  * if device is in the listening list.
@@ -45,6 +49,8 @@ class DeviceDiscovery : public noncopyable, IOLoop::IOLoopDelegate
 {
     using TupleAprDevice = boost::tuple< apr_pool_t *, apr_time_t, DeviceInfo >;
     using ConnectingDeviceMap = std::map< apr_socket_t *, TupleAprDevice >;
+
+    //-----------------------------------------------------------------------------------
 
 public:
 
@@ -74,13 +80,13 @@ public:
 private:
 
     /** broadcast listening port number. */
-    static const apr_port_t kListenPort = 55000;
+    static constexpr auto kListenPort = 55000;
     /** command port number start offset. */
-    static const apr_port_t kCmdPortOffset = 500;
+    static constexpr auto kCmdPortOffset = 500;
     /** data port number start offset. */
-    static const apr_port_t kDataPortOffset = 1000;
+    static constexpr auto kDataPortOffset = 1000;
     /** sensor port number start offset. */
-    static const apr_port_t kSensorPortOffset = 1000;
+    static constexpr auto kSensorPortOffset = 1000;
 
     static uint16_t _port_count;
 
@@ -98,8 +104,11 @@ private:
 
     void OnBroadcast( const CommPacket& packet, apr_sockaddr_t* addr );
 };
+//=======================================================================================
 
 DeviceDiscovery& device_discovery();
+
+//=======================================================================================
 
 }  // namespace livox
 

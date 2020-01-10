@@ -27,18 +27,26 @@
 
 #include <stdint.h>
 
-#define kMaxLidarCount 32
+//=======================================================================================
+
+static constexpr auto kMaxLidarCount = 32;
+
+//=======================================================================================
 
 /** Device type. */
-typedef enum {
+typedef enum
+{
   kDeviceTypeHub = 0,          /**< Livox Hub. */
   kDeviceTypeLidarMid40 = 1,   /**< Mid-40. */
   kDeviceTypeLidarTele = 2,    /**< Tele. */
   kDeviceTypeLidarHorizon = 3  /**< Horizon. */
 } DeviceType;
 
+//=======================================================================================
+
 /** Lidar state. */
-typedef enum {
+typedef enum
+{
   kLidarStateInit = 0,        /**< Initialization state. */
   kLidarStateNormal = 1,      /**< Normal work state. */
   kLidarStatePowerSaving = 2, /**< Power-saving state. */
@@ -47,27 +55,39 @@ typedef enum {
   kLidarStateUnknown = 5      /**< Unknown state. */
 } LidarState;
 
+//=======================================================================================
+
 /** Lidar mode. */
-typedef enum {
+typedef enum
+{
   kLidarModeNormal = 1,      /**< Normal mode. */
   kLidarModePowerSaving = 2, /**< Power-saving mode. */
   kLidarModeStandby = 3      /**< Standby mode. */
 } LidarMode;
 
+//=======================================================================================
+
 /** Lidar feature. */
-typedef enum {
+typedef enum
+{
   kLidarFeatureNone = 0,   /**< No feature. */
   kLidarFeatureRainFog = 1 /**< Rain and fog feature. */
 } LidarFeature;
 
+//=======================================================================================
+
 /** Lidar IP mode. */
-typedef enum {
+typedef enum
+{
   kLidarDynamicIpMode = 0,   /**< Dynamic IP. */
   kLidarStaticIpMode = 1     /**< Static IP. */
 } LidarIpMode;
 
+//=======================================================================================
+
 /** Function return value definition. */
-typedef enum {
+typedef enum
+{
   kStatusSendFailed = -9,           /**< Command send failed. */
   kStatusHandlerImplNotExist = -8,  /**< Handler implementation not exist. */
   kStatusInvalidHandle = -7,        /**< Device handle invalid. */
@@ -80,19 +100,27 @@ typedef enum {
   kStatusSuccess = 0                /**< Success. */
 } LivoxStatus;
 
+//=======================================================================================
+
 /** Fuction return value defination, refer to \ref LivoxStatus. */
 typedef int32_t livox_status;
 
+//=======================================================================================
+
 /** Device update type, indicating the change of device connection or working state. */
-typedef enum {
+typedef enum
+{
   kEventConnect = 0,              /**< Device is connected. */
   kEventDisconnect = 1,           /**< Device is removed. */
   kEventStateChange = 2,          /**< Device working state changes or an error occurs. */
   kEventHubConnectionChange = 3   /**< Hub is connected or LiDAR unit(s) is/are removed. */
 } DeviceEvent;
 
+//=======================================================================================
+
 /** Timestamp sync mode define. */
-typedef enum {
+typedef enum
+{
   kTimestampTypeNoSync = 0, /**< No sync signal mode. */
   kTimestampTypePtp = 1,    /**< 1588v2.0 PTP sync mode. */
   kTimestampTypeRsvd = 2,   /**< Reserved use. */
@@ -101,8 +129,11 @@ typedef enum {
   kTimestampTypeUnknown = 5 /**< Unknown mode. */
 } TimestampType;
 
+//=======================================================================================
+
 /** Point data type. */
-typedef enum {
+typedef enum
+{
   kCartesian,               /**< Cartesian coordinate point cloud. */
   kSpherical,               /**< Spherical coordinate point cloud. */
   kExtendCartesian,         /**< Extend cartesian coordinate point cloud. */
@@ -113,60 +144,85 @@ typedef enum {
   kMaxPointDataType         /**< Max Point Data Type. */
 } PointDataType;
 
+//=======================================================================================
+
 /** Point cloud return mode. */
-typedef enum {
+typedef enum
+{
   kFirstReturn,             /**< First single return mode . */
   kStrongestReturn,         /**< Strongest single return mode. */
   kDualReturn               /**< Dual return mode. */
 } PointCloudReturnMode;
 
+//=======================================================================================
+
 /** IMU push frequency. */
-typedef enum {
+typedef enum
+{
   kImuFreq0Hz,              /**< IMU push closed. */
   kImuFreq200Hz,            /**< IMU push frequency 200Hz. */
 } ImuFreq;
 
+//=======================================================================================
+
 #pragma pack(1)
 
-#define LIVOX_SDK_MAJOR_VERSION       2
-#define LIVOX_SDK_MINOR_VERSION       0
-#define LIVOX_SDK_PATCH_VERSION       0
+//=======================================================================================
 
-#define kBroadcastCodeSize 16
+static constexpr auto LIVOX_SDK_MAJOR_VERSION = 2;
+static constexpr auto LIVOX_SDK_MINOR_VERSION = 0;
+static constexpr auto LIVOX_SDK_PATCH_VERSION = 0;
+
+static constexpr auto kBroadcastCodeSize = 16;
+
+//=======================================================================================
 
 /** The numeric version information struct.  */
-typedef struct {
+typedef struct
+{
   int major;      /**< major number */
   int minor;      /**< minor number */
   int patch;      /**< patch number */
 } LivoxSdkVersion;
 
+//=======================================================================================
+
 /** Cartesian coordinate format. */
-typedef struct {
+typedef struct
+{
   int32_t x;            /**< X axis, Unit:mm */
   int32_t y;            /**< Y axis, Unit:mm */
   int32_t z;            /**< Z axis, Unit:mm */
   uint8_t reflectivity; /**< Reflectivity */
 } LivoxRawPoint;
 
+//=======================================================================================
+
 /** Spherical coordinate format. */
-typedef struct {
+typedef struct
+{
   uint32_t depth;       /**< Radial distance, Unit:mm */
   uint16_t theta;       /**< Polar angle, Unit:0.01rad */
   uint16_t phi;         /**< Azimuthal angle, Unit:0.01rad */
   uint8_t reflectivity; /**< Reflectivity */
 } LivoxSpherPoint;
 
+//=======================================================================================
+
 /** Standard point cloud format */
-typedef struct {
+typedef struct
+{
   float x;              /**< X axis, Unit:m */
   float y;              /**< Y axis, Unit:m */
   float z;              /**< Z axis, Unit:m */
   uint8_t reflectivity; /**< Reflectivity */
 } LivoxPoint;
 
+//=======================================================================================
+
 /** Extend cartesian coordinate format. */
-typedef struct {
+typedef struct
+{
   int32_t x;            /**< X axis, Unit:mm */
   int32_t y;            /**< Y axis, Unit:mm */
   int32_t z;            /**< Z axis, Unit:mm */
@@ -174,8 +230,11 @@ typedef struct {
   uint8_t tag;          /**< Tag */
 } LivoxExtendRawPoint;
 
+//=======================================================================================
+
 /** Extend spherical coordinate format. */
-typedef struct {
+typedef struct
+{
   uint32_t depth;       /**< Radial distance, Unit:mm */
   uint16_t theta;       /**< Polar angle, Unit:0.01rad */
   uint16_t phi;         /**< Azimuthal angle, Unit:0.01rad */
@@ -183,8 +242,11 @@ typedef struct {
   uint8_t tag;          /**< Tag */
 } LivoxExtendSpherPoint;
 
+//=======================================================================================
+
 /** Dual extend cartesian coordinate format. */
-typedef struct {
+typedef struct
+{
   int32_t x1;            /**< X axis, Unit:mm */
   int32_t y1;            /**< Y axis, Unit:mm */
   int32_t z1;            /**< Z axis, Unit:mm */
@@ -197,8 +259,11 @@ typedef struct {
   uint8_t tag2;          /**< Tag */
 } LivoxDualExtendRawPoint;
 
+//=======================================================================================
+
 /** Dual extend spherical coordinate format. */
-typedef struct {
+typedef struct
+{
   uint16_t theta;        /**< Polar angle, Unit:0.01rad */
   uint16_t phi;          /**< Azimuthal angle, Unit:0.01rad */
   uint32_t depth1;       /**< Radial distance, Unit:mm */
@@ -209,8 +274,11 @@ typedef struct {
   uint8_t tag2;          /**< Tag */
 } LivoxDualExtendSpherPoint;
 
+//=======================================================================================
+
 /** IMU data format. */
-typedef struct {
+typedef struct
+{
   float gyro_x;        /**< Gyroscope X axis, Unit:rad/s */
   float gyro_y;        /**< Gyroscope Y axis, Unit:rad/s */
   float gyro_z;        /**< Gyroscope Z axis, Unit:rad/s */
@@ -219,8 +287,11 @@ typedef struct {
   float acc_z;         /**< Accelerometer Z axis, Unit:g */
 } LivoxImuPoint;
 
+//=======================================================================================
+
 /** LiDAR error code. */
-typedef struct {
+typedef struct
+{
   uint32_t temp_status : 2;      /**< 0: Temperature in Normal State. 1: High or Low. 2: Extremely High or Extremely Low. */
   uint32_t volt_status : 2;      /**< 0: Voltage in Normal State. 1: High. 2: Extremely High. */
   uint32_t motor_status : 2;     /**< 0: Motor in Normal State. 1: Motor in Warning State. 2:Motor in Error State, Unable to Work. */
@@ -242,8 +313,11 @@ typedef struct {
   uint32_t system_status : 2;    /**< 0: Normal. 1: Warning. 2: Error. */
 } LidarErrorCode;
 
+//=======================================================================================
+
 /** Hub error code. */
-typedef struct {
+typedef struct
+{
   /** 0: No synchronization signal.
    * 1: 1588 synchronization.
    * 2: GPS synchronization.
@@ -258,17 +332,23 @@ typedef struct {
   uint32_t system_status : 2;      /**< 0: Normal. 1: Warning. 2: Error. */
 } HubErrorCode;
 
+//=======================================================================================
+
 /**
  * Device error message.
  */
-typedef union {
+typedef union
+{
   uint32_t error_code;                /**< Error code. */
   LidarErrorCode lidar_error_code;    /**< Lidar error code. */
   HubErrorCode hub_error_code;        /**< Hub error code. */
 } ErrorMessage;
 
+//=======================================================================================
+
 /** Point cloud packet. */
-typedef struct {
+typedef struct
+{
   uint8_t version;              /**< Packet protocol version. */
   uint8_t slot;                 /**< Slot number used for connecting LiDAR. */
   uint8_t id;                   /**< LiDAR id. */
@@ -281,14 +361,20 @@ typedef struct {
   uint8_t data[1];              /**< Point cloud data. */
 } LivoxEthPacket;
 
+//=======================================================================================
+
 /** Information of LiDAR work state. */
-typedef union {
+typedef union
+{
   uint32_t progress;    /**< LiDAR work state switching progress. */
   ErrorMessage status_code; /**< LiDAR work state status code. */
 } StatusUnion;
 
+//=======================================================================================
+
 /** Information of the connected LiDAR or hub. */
-typedef struct {
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code, null-terminated string, 15 characters at most. */
   uint8_t handle;                          /**< Device handle. */
   uint8_t slot;                            /**< Slot number used for connecting LiDAR. */
@@ -303,16 +389,22 @@ typedef struct {
   StatusUnion status;                      /**< LiDAR work state status. */
 } DeviceInfo;
 
+//=======================================================================================
+
 /** The information of broadcast device. */
-typedef struct {
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code, null-terminated string, 15 characters at most. */
   uint8_t dev_type;                        /**< Device type, refer to \ref DeviceType. */
   uint16_t reserved;                       /**< Reserved. */
   char ip[16];                             /**< Device ip. */
 } BroadcastDeviceInfo;
 
+//=======================================================================================
+
 /** The information of LiDAR units that are connected to the Livox Hub. */
-typedef struct {
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code, null-terminated string, 15 characters at most. */
   uint8_t dev_type;                        /**< Device type, refer to \ref DeviceType. */
   uint8_t version[4];                      /**< Firmware version. */
@@ -320,74 +412,115 @@ typedef struct {
   uint8_t id;                              /**< Device id. */
 } ConnectedLidarInfo;
 
+//=======================================================================================
+
 /** LiDAR mode configuration information. */
-typedef struct {
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code, null-terminated string, 15 characters at most. */
   uint8_t state;                           /**< LiDAR state, refer to \ref LidarMode. */
 } LidarModeRequestItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   uint8_t ret_code;                        /**< Return code. */
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
 } ReturnCode;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
 } DeviceBroadcastCode;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   uint8_t feature;                         /**< Close or open the rain and fog feature. */
 } RainFogSuppressRequestItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   uint8_t state;                           /**< Fan state: 1 for turn on fan, 0 for turn off fan. */
 } FanControlRequestItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
 } GetFanStateRequestItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   uint8_t ret_code;                        /**< Return code. */
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   uint8_t state;                           /**< Fan state: 1 for fan is on, 0 for fan is off. */
 } GetFanStateResponseItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   uint8_t mode;                            /**< Point cloud return mode, refer to \ref PointCloudReturnMode. */
 } SetPointCloudReturnModeRequestItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
 } GetPointCloudReturnModeRequestItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   uint8_t ret_code;                        /**< Return code. */
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   uint8_t mode;                            /**< Point cloud return mode, refer to \ref PointCloudReturnMode. */
 } GetPointCloudReturnModeResponseItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   uint8_t freq;                            /**< IMU push frequency, refer to \ref ImuFreq. */
 } SetImuPushFrequencyRequestItem;
 
+//=======================================================================================
 
-typedef struct {
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
 } GetImuPushFrequencyRequestItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   uint8_t ret_code;                        /**< Return code. */
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   uint8_t freq;                            /**< IMU push frequency, refer to \ref ImuFreq. */
 } GetImuPushFrequencyResponseItem;
 
+//=======================================================================================
+
 /** LiDAR configuration information. */
-typedef struct {
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Device broadcast code. */
   float roll;                              /**< Roll angle, unit: degree. */
   float pitch;                             /**< Pitch angle, unit: degree. */
@@ -397,8 +530,11 @@ typedef struct {
   int32_t z;                               /**< Z translation, unit: mm. */
 } ExtrinsicParameterRequestItem;
 
+//=======================================================================================
+
 /** LiDAR extrinsic parameters. */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;                        /**< Return code. */
   char broadcast_code[kBroadcastCodeSize]; /**< Broadcast code. */
   float roll;                              /**< Roll angle, unit: degree. */
@@ -409,43 +545,58 @@ typedef struct {
   int32_t z;                               /**< Z translation, unit: mm. */
 } ExtrinsicParameterResponseItem;
 
-typedef struct {
+//=======================================================================================
+
+typedef struct
+{
   char broadcast_code[kBroadcastCodeSize]; /**< Broadcast code. */
   uint8_t state;                           /**< LiDAR state. */
   uint8_t feature;                         /**< LiDAR feature. */
   StatusUnion error_union;                 /**< LiDAR work state. */
 } LidarStateItem;
 
+//=======================================================================================
+
 /**
  * The request body for the command of handshake.
  */
-typedef struct {
+typedef struct
+{
   uint32_t ip_addr;     /**< IP address of the device. */
   uint16_t data_port;   /**< UDP port of the data connection. */
   uint16_t cmd_port;    /**< UDP port of the command connection. */
   uint16_t sensor_port; /**< UDP port of the sensor connection. */
 } HandshakeRequest;
 
+//=======================================================================================
+
 /**
  * The response body of querying device information.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;            /**< Return code. */
   uint8_t firmware_version[4]; /**< Firmware version. */
 } DeviceInformationResponse;
 
+//=======================================================================================
+
 /**
  * The request body of the command for setting device's IP mode.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ip_mode;  /**< IP address mode: 0 for dynamic IP address, 1 for static IP address. */
   uint32_t ip_addr; /**< IP address. */
 } SetDeviceIPModeRequest;
 
+//=======================================================================================
+
 /**
  * The response body of getting device's IP mode.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;  /**< Return code. */
   uint8_t ip_mode;   /**< IP address mode: 0 for dynamic IP address, 1 for static IP address. */
   uint32_t ip_addr;  /**< IP address. */
@@ -453,29 +604,38 @@ typedef struct {
   uint32_t gw_addr;  /**< Gateway address. */
 } GetDeviceIpModeResponse;
 
+//=======================================================================================
+
 /**
  * The request body of the command for setting static device's IP mode.
  */
-typedef struct {
+typedef struct
+{
   uint32_t ip_addr;  /**< IP address. */
   uint32_t net_mask; /**< Subnet mask. */
   uint32_t gw_addr;  /**< Gateway address. */
 } SetStaticDeviceIpModeRequest;
 
+//=======================================================================================
+
 /**
  * The body of heartbeat response.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;        /**< Return code. */
   uint8_t state;           /**< Working state. */
   uint8_t feature;         /**< LiDAR feature. */
   StatusUnion error_union; /**< LiDAR work state. */
 } HeartbeatResponse;
 
+//=======================================================================================
+
 /**
  * The request body for the command of setting Livox LiDAR's parameters.
  */
-typedef struct {
+typedef struct
+{
   float roll;  /**< Roll angle, unit: degree. */
   float pitch; /**< Pitch angle, unit: degree. */
   float yaw;   /**< Yaw angle, unit: degree. */
@@ -484,10 +644,13 @@ typedef struct {
   int32_t z;   /**< Z translation, unit: mm. */
 } LidarSetExtrinsicParameterRequest;
 
+//=======================================================================================
+
 /**
  * The response body of getting Livox LiDAR's parameters.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;
   float roll;  /**< Roll angle, unit: degree. */
   float pitch; /**< Pitch angle, unit: degree. */
@@ -497,35 +660,46 @@ typedef struct {
   int32_t z;   /**< Z translation, unit: mm. */
 } LidarGetExtrinsicParameterResponse;
 
+//=======================================================================================
+
 /**
  * The response body of getting the Livox LiDAR's fan state.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;     /**< Return code. */
   uint8_t state;        /**< Fan state: 1 for fan is on, 0 for fan is off. */
 } LidarGetFanStateResponse;
 
+//=======================================================================================
+
 /**
  * The response body of getting the Livox LiDAR's point cloud return mode.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;    /**< Return code. */
   uint8_t mode;        /**< Point cloud return mode, refer to \ref PointCloudReturnMode. */
 } LidarGetPointCloudReturnModeResponse;
 
+//=======================================================================================
 
 /**
  * The response body of getting the Livox LiDAR's IMU push frequency.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;            /**< Return code. */
   uint8_t freq;                /**< IMU push frequency, refer to \ref ImuFreq. */
 } LidarGetImuPushFrequencyResponse;
 
+//=======================================================================================
+
 /**
  * The response body of setting the Livox LiDAR's Sync time.
  */
-typedef struct {
+typedef struct
+{
   uint8_t year;
   uint8_t month;
   uint8_t day;
@@ -533,209 +707,283 @@ typedef struct {
   uint32_t mircrosecond;
 } LidarSetUtcSyncTimeRequest;
 
+//=======================================================================================
+
 /**
  * The response body of querying the information of LiDAR units connected to the Livox Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;                       /**< Return code. */
   uint8_t count;                          /**< Count of device_info_list. */
   ConnectedLidarInfo device_info_list[1]; /**< Connected lidars information list. */
 } HubQueryLidarInformationResponse;
 
+//=======================================================================================
+
 /**
  * The request body of setting Livox Hub's working mode.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                       /**< Count of config_list. */
   LidarModeRequestItem config_list[1]; /**< LiDAR mode configuration list. */
 } HubSetModeRequest;
 
+//=======================================================================================
+
 /**
  * The response of setting Livox Hub's working mode.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;             /**< Return code. */
   uint8_t count;                /**< Count of ret_state_list. */
   ReturnCode ret_state_list[1]; /**< Return status list. */
 } HubSetModeResponse;
 
+//=======================================================================================
+
 /**
  * The request body of toggling the power supply of the slot.
  */
-typedef struct {
+typedef struct
+{
   uint8_t slot;  /**< Slot of the hub. */
   uint8_t state; /**< Status of toggling the power supply. */
 } HubControlSlotPowerRequest;
 
+//=======================================================================================
+
 /**
  * The request body of setting the Livox Hub's parameters.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                 /**< Count of cfg_param_list. */
   ExtrinsicParameterRequestItem parameter_list[1]; /**< Extrinsic parameter configuration list. */
 } HubSetExtrinsicParameterRequest;
 
+//=======================================================================================
+
 /**
  * The response body of setting the Livox Hub's parameters.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;            /**< Return code. */
   uint8_t count;               /**< Count of ret_code_list. */
   ReturnCode ret_code_list[1]; /**< Return code list. */
 } HubSetExtrinsicParameterResponse;
 
+//=======================================================================================
+
 /**
  * The request body of getting the Livox Hub's parameters.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                    /**< Count of code_list. */
   DeviceBroadcastCode code_list[1]; /**< Broadcast code list. */
 } HubGetExtrinsicParameterRequest;
 
+//=======================================================================================
+
 /**
  * The response body of getting the Livox Hub's parameters.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;        /**< Return code. */
   uint8_t count;           /**< Count of code_list. */
   ExtrinsicParameterResponseItem parameter_list[1]; /**< Extrinsic parameter list. */
 } HubGetExtrinsicParameterResponse;
 
+//=======================================================================================
+
 /**
  * The response body of getting sub LiDAR's state conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;             /**< Return code. */
   uint8_t count;                /**< Count of state_list. */
   LidarStateItem state_list[1]; /**< LiDAR units state list. */
 } HubQueryLidarStatusResponse;
 
+//=======================================================================================
+
 /**
  * The request body of toggling the Livox Hub's rain and fog mode.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                                /**< Count of lidar_cfg_list. */
   RainFogSuppressRequestItem lidar_cfg_list[1]; /**< Rain fog suppress configuration list. */
 } HubRainFogSuppressRequest;
 
+//=======================================================================================
+
 /**
  * The response body of toggling the Livox Hub's rain and fog mode.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;             /**< Return code. */
   uint8_t count;                /**< Count of ret_state_list. */
   ReturnCode ret_state_list[1]; /**< Return state list */
 } HubRainFogSuppressResponse;
 
+//=======================================================================================
+
 /**
 * The response body of getting Hub slots' power state.
 */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;             /**< Return code. */
   uint16_t slot_power_state;    /**< Slot power status. */
 } HubQuerySlotPowerStatusResponse;
 
+//=======================================================================================
+
 /**
  * The request body of controlling the sub LiDAR's fan state conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                /**< Count of lidar_cfg_list. */
   FanControlRequestItem lidar_cfg_list[1]; /**< Fan control configuration list. */
 } HubFanControlRequest;
 
+//=======================================================================================
+
 /**
  * The response body of controlling the sub LiDAR's fan state conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;             /**< Return code. */
   uint8_t count;                /**< Count of return_list. */
   ReturnCode return_list[1];    /**< Return list */
 } HubFanControlResponse;
 
+//=======================================================================================
+
 /**
  * The request body of getting the sub LiDAR's fan state conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                             /**< Count of lidar_cfg_list. */
   GetFanStateRequestItem lidar_cfg_list[1];  /**< Get Fan state list. */
 } HubGetFanStateRequest;
 
+//=======================================================================================
+
 /**
  * The response body of getting the sub LiDAR's fan state conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;                         /**< Return code. */
   uint8_t count;                            /**< Count of return_list. */
   GetFanStateResponseItem return_list[1];   /**< Fan state list. */
 } HubGetFanStateResponse;
 
+//=======================================================================================
+
 /**
  * The request body of setting point cloud return mode of sub LiDAR conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;         /**< Count of lidar_cfg_list. */
   SetPointCloudReturnModeRequestItem lidar_cfg_list[1]; /**< Point cloud return mode configuration list. */
 } HubSetPointCloudReturnModeRequest;
 
+//=======================================================================================
+
 /**
  * The response body of setting point cloud return mode of sub LiDAR conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;             /**< Return code. */
   uint8_t count;                /**< Count of return_list. */
   ReturnCode return_list[1];    /**< Return list. */
 } HubSetPointCloudReturnModeResponse;
 
+//=======================================================================================
+
 /**
  * The request body of getting sub LiDAR's point cloud return mode conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                /**< Count of lidar_cfg_list. */
   GetPointCloudReturnModeRequestItem lidar_cfg_list[1]; /**< Get point cloud return mode list. */
 } HubGetPointCloudReturnModeRequest;
 
+//=======================================================================================
+
 /**
  * The response body of getting sub LiDAR's point cloud return mode conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;               /**< Return code. */
   uint8_t count;                  /**< Count of return_list. */
   GetPointCloudReturnModeResponseItem return_list[1];  /**< Point cloud return mode list. */
 } HubGetPointCloudReturnModeResponse;
 
+//=======================================================================================
+
 /**
  * The request body of setting IMU push frequency of sub LiDAR conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                 /**< Count of lidar_cfg_list. */
   SetImuPushFrequencyRequestItem lidar_cfg_list[1]; /**< IMU push frequency configuration list. */
 } HubSetImuPushFrequencyRequest;
 
+//=======================================================================================
+
 /**
  * The response body of setting IMU push frequency of sub LiDAR conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;               /**< Return code. */
   uint8_t count;                  /**< Count of return_list. */
   ReturnCode return_list[1];      /**< Return list. */
 } HubSetImuPushFrequencyResponse;
 
+//=======================================================================================
+
 /**
  * The request body of getting sub LiDAR's IMU push frequency conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t count;                 /**< Count of lidar_cfg_list. */
   GetImuPushFrequencyRequestItem lidar_cfg_list[1];  /**< Get IMU push frequency list. */
 } HubGetImuPushFrequencyRequest;
 
+//=======================================================================================
+
 /**
  * The response body of getting sub LiDAR's IMU push frequency conneted to Hub.
  */
-typedef struct {
+typedef struct
+{
   uint8_t ret_code;              /**< Return code. */
   uint8_t count;                 /**< Count of return_list. */
   GetImuPushFrequencyResponseItem return_list[1];    /**< IMU push frequency list. */
 } HubGetImuPushFrequencyResponse;
+
+//=======================================================================================
 
 #pragma pack()
 

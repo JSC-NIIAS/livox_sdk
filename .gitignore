@@ -9,6 +9,10 @@ build/sdk_core
 build/sample
 build/sample_cc
 
+# Qt build temporary files and folders
+*.pro.user*
+*.pri.*
+
 #whitelist
 !build/notes.txt
 

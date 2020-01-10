@@ -28,97 +28,133 @@
 #include "data_handler/data_handler.h"
 #include "base/logging.h"
 #include "device_manager.h"
+
+//=======================================================================================
+
 using namespace livox;
+
+//=======================================================================================
+
 IOThread *g_thread = NULL;
 static bool is_initialized = false;
 
-void GetLivoxSdkVersion(LivoxSdkVersion *version) {
-  if (version != NULL) {
-    version->major = LIVOX_SDK_MAJOR_VERSION;
-    version->minor = LIVOX_SDK_MINOR_VERSION;
-    version->patch = LIVOX_SDK_PATCH_VERSION;
-  }
+//=======================================================================================
+
+//=======================================================================================
+void GetLivoxSdkVersion( LivoxSdkVersion* version )
+{
+    if ( version != NULL )
+    {
+        version->major = LIVOX_SDK_MAJOR_VERSION;
+        version->minor = LIVOX_SDK_MINOR_VERSION;
+        version->patch = LIVOX_SDK_PATCH_VERSION;
+    }
 }
+//=======================================================================================
 
-bool Init() {
-  if (is_initialized) {
-    return false;
-  }
+//=======================================================================================
+bool Init()
+{
+    if ( is_initialized )
+        return false;
 
-  bool result = false;
-  do {
-    InitLogger();
+    bool result = false;
 
-    if (apr_initialize() != APR_SUCCESS) {
-      result = false;
-      break;
+    do
+    {
+        InitLogger();
+
+        if ( apr_initialize() != APR_SUCCESS )
+        {
+            result = false;
+            break;
+        }
+
+        g_thread = new IOThread();
+        g_thread->Init();
+
+        if ( device_discovery().Init() == false )
+        {
+            result = false;
+            break;
+        }
+
+        if ( device_manager().Init() == false )
+        {
+            result = false;
+            break;
+        }
+
+        if ( command_handler().Init( g_thread->loop() ) == false )
+        {
+            result = false;
+            break;
+        }
+
+        if ( data_handler().Init() == false )
+        {
+            result = false;
+            break;
+        }
+
+        result = true;
+
+    } while (0);
+
+    if ( result == false )
+        apr_terminate();
+
+    is_initialized = result;
+
+    return result;
+}
+//=======================================================================================
+
+//=======================================================================================
+void Uninit()
+{
+    if ( !is_initialized )
+        return;
+
+    if ( g_thread )
+    {
+        g_thread->Quit();
+        g_thread->Join();
     }
 
-    g_thread = new IOThread();
-    g_thread->Init();
+    device_discovery().Uninit();
+    command_handler().Uninit();
+    data_handler().Uninit();
+    device_manager().Uninit();
 
-    if (device_discovery().Init() == false) {
-      result = false;
-      break;
+    if ( g_thread )
+    {
+        g_thread->Uninit();
+        delete g_thread;
+        g_thread = NULL;
     }
 
-    if (device_manager().Init() == false) {
-      result = false;
-      break;
-    }
+    UninitLogger();
 
-    if (command_handler().Init(g_thread->loop()) == false) {
-      result = false;
-      break;
-    }
-    if (data_handler().Init() == false) {
-      result = false;
-      break;
-    }
-
-    result = true;
-  } while (0);
-
-  if (result == false) {
     apr_terminate();
-  }
 
-  is_initialized = result;
-  return result;
+    is_initialized = false;
 }
+//=======================================================================================
 
-void Uninit() {
-  if (!is_initialized) {
-    return;
-  }
-  if (g_thread) {
-    g_thread->Quit();
-    g_thread->Join();
-  }
+//=======================================================================================
+bool Start()
+{
+    if ( g_thread && device_discovery().Start( g_thread->loop() ) && g_thread->Start() )
+        return true;
 
-  device_discovery().Uninit();
-  command_handler().Uninit();
-  data_handler().Uninit();
-  device_manager().Uninit();
-
-  if (g_thread) {
-    g_thread->Uninit();
-    delete g_thread;
-    g_thread = NULL;
-  }
-  
-  UninitLogger();
-  apr_terminate();
-  is_initialized = false;
+    return false;
 }
+//=======================================================================================
 
-bool Start() {
-  if (g_thread && device_discovery().Start(g_thread->loop()) && g_thread->Start()) {
-    return true;
-  }
-  return false;
+//=======================================================================================
+void SaveLoggerFile()
+{
+    is_save_log_file = true;
 }
-
-void SaveLoggerFile() {
-  is_save_log_file = true;
-}
+//=======================================================================================

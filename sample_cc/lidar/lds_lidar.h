@@ -33,97 +33,153 @@
 #include "livox_def.h"
 #include "livox_sdk.h"
 
+//=======================================================================================
 
-typedef enum {
-  kConnectStateOff = 0,
-  kConnectStateOn = 1,
-  kConnectStateConfig = 2,
-  kConnectStateSampling = 3,
+typedef enum
+{
+    kConnectStateOff = 0,
+    kConnectStateOn = 1,
+    kConnectStateConfig = 2,
+    kConnectStateSampling = 3,
 } LidarConnectState;
 
-typedef enum {
-  kConfigFan = 1,
-  kConfigReturnMode = 2,
-  kConfigCoordinate = 4,
-  kConfigImuRate = 8
+typedef enum
+{
+    kConfigFan = 1,
+    kConfigReturnMode = 2,
+    kConfigCoordinate = 4,
+    kConfigImuRate = 8
 } LidarConfigCodeBit;
 
-typedef enum {
-  kCoordinateCartesian = 0,
-  kCoordinateSpherical
+typedef enum
+{
+    kCoordinateCartesian = 0,
+    kCoordinateSpherical
 } CoordinateType;
 
-typedef struct {
-  bool enable_fan;
-  uint32_t return_mode;
-  uint32_t coordinate;
-  uint32_t imu_rate;
-  volatile uint32_t set_bits;
-  volatile uint32_t get_bits;
+typedef struct
+{
+    bool enable_fan;
+    uint32_t return_mode;
+    uint32_t coordinate;
+    uint32_t imu_rate;
+    volatile uint32_t set_bits;
+    volatile uint32_t get_bits;
 } UserConfig;
 
-typedef struct {
-  uint8_t handle;
-  LidarConnectState connect_state;
-  DeviceInfo info;
-  UserConfig config;
+typedef struct
+{
+    uint8_t handle;
+    LidarConnectState connect_state;
+    DeviceInfo info;
+    UserConfig config;
 } LidarDevice;
+
+//=======================================================================================
 
 /**
  * LiDAR data source, data from dependent lidar.
  */
-class LdsLidar {
- public:
+class LdsLidar
+{
+public:
 
-  static LdsLidar& GetInstance() {
-    static LdsLidar lds_lidar;
-    return lds_lidar;
-  }
+    static LdsLidar& GetInstance()
+    {
+      static LdsLidar lds_lidar;
+      return lds_lidar;
+    }
 
-  int InitLdsLidar(std::vector<std::string>& broadcast_code_strs);
-  int DeInitLdsLidar(void);
+    //-----------------------------------------------------------------------------------
 
- private:
-  LdsLidar();
-  LdsLidar(const LdsLidar&) = delete;
-  ~LdsLidar();
-  LdsLidar& operator=(const LdsLidar&) = delete;
+    int broadcast( std::vector<std::string>& broadcast_code_strs );
+    int DeInitLdsLidar();
 
-  static void GetLidarDataCb(uint8_t handle, LivoxEthPacket *data,\
-                             uint32_t data_num, void *client_data);
-  static void OnDeviceBroadcast(const BroadcastDeviceInfo *info);
-  static void OnDeviceChange(const DeviceInfo *info, DeviceEvent type);
-  static void StartSampleCb(livox_status status, uint8_t handle, uint8_t response, void *clent_data);
-  static void StopSampleCb(livox_status status, uint8_t handle, uint8_t response, void *clent_data);
-  static void DeviceInformationCb(livox_status status, uint8_t handle, \
-                                  DeviceInformationResponse *ack, void *clent_data);
-  static void LidarErrorStatusCb(livox_status status, uint8_t handle, ErrorMessage *message);
-  static void ControlFanCb(livox_status status, uint8_t handle, \
-                           uint8_t response, void *clent_data);
-  static void SetPointCloudReturnModeCb(livox_status status, uint8_t handle, \
-                                        uint8_t response, void *clent_data);
-  static void SetCoordinateCb(livox_status status, uint8_t handle, \
-                              uint8_t response, void *clent_data);
-  static void SetImuRatePushFrequencyCb(livox_status status, uint8_t handle, \
-                                        uint8_t response, void *clent_data);
+    //-----------------------------------------------------------------------------------
 
-  int AddBroadcastCodeToWhitelist(const char* broadcast_code);
-  void AddLocalBroadcastCode(void);
-  bool FindInWhitelist(const char* broadcast_code);
+private:
 
-  void EnableAutoConnectMode(void) { auto_connect_mode_ = true; }
-  void DisableAutoConnectMode(void) { auto_connect_mode_ = false; }
-  bool IsAutoConnectMode(void) { return auto_connect_mode_; }
+    bool _auto_connect_mode;
+    uint32_t _whitelist_count;
+    volatile bool _is_initialized;
+    char _broadcast_code_whitelist[kMaxLidarCount][kBroadcastCodeSize];
 
-  bool auto_connect_mode_;
-  uint32_t whitelist_count_;
-  volatile bool is_initialized_;
-  char broadcast_code_whitelist_[kMaxLidarCount][kBroadcastCodeSize];
+    uint32_t _lidar_count;
+    LidarDevice _lidars[kMaxLidarCount];
 
-  uint32_t lidar_count_;
-  LidarDevice lidars_[kMaxLidarCount];
+    uint32_t _data_recveive_count[kMaxLidarCount];
 
-  uint32_t data_recveive_count_[kMaxLidarCount];
+    //-----------------------------------------------------------------------------------
+
+    LdsLidar();
+    ~LdsLidar();
+
+    LdsLidar( const LdsLidar& ) = delete;
+    LdsLidar& operator=( const LdsLidar& ) = delete;
+
+    //-----------------------------------------------------------------------------------
+
+    static void GetLidarDataCb( const uint8_t handle,
+                                LivoxEthPacket* data,
+                                const uint32_t data_num,
+                                void* client_data );
+
+    static void OnDeviceBroadcast( const BroadcastDeviceInfo* info );
+
+    static void OnDeviceChange( const DeviceInfo* info, const DeviceEvent type );
+
+    static void StartSampleCb( const livox_status status,
+                               const uint8_t handle,
+                               const uint8_t response,
+                               void* clent_data );
+
+    static void StopSampleCb( const livox_status status,
+                              const uint8_t handle,
+                              const uint8_t response,
+                              void* clent_data );
+
+    static void DeviceInformationCb( const livox_status status,
+                                     const uint8_t handle,
+                                     DeviceInformationResponse* ack,
+                                     void* clent_data );
+
+    static void LidarErrorStatusCb( const livox_status status,
+                                    const uint8_t handle,
+                                    ErrorMessage* message );
+
+    static void ControlFanCb( const livox_status status,
+                              const uint8_t handle,
+                              const uint8_t response,
+                              void* clent_data );
+
+    static void SetPointCloudReturnModeCb( const livox_status status,
+                                           const uint8_t handle,
+                                           const uint8_t response,
+                                           void* clent_data );
+
+    static void SetCoordinateCb( const livox_status status,
+                                 const uint8_t handle,
+                                 const uint8_t response,
+                                 void* clent_data );
+
+    static void SetImuRatePushFrequencyCb( const livox_status status,
+                                           const uint8_t handle,
+                                           const uint8_t response,
+                                           void* clent_data );
+
+    //-----------------------------------------------------------------------------------
+
+    int AddBroadcastCodeToWhitelist( const char* broadcast_code );
+
+    void AddLocalBroadcastCode();
+
+    bool FindInWhitelist( const char* broadcast_code );
+
+    void EnableAutoConnectMode();
+
+    void DisableAutoConnectMode();
+
+    bool IsAutoConnectMode();
 };
 
 #endif

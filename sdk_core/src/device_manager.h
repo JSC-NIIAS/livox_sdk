@@ -34,7 +34,8 @@
 
 //=======================================================================================
 
-namespace livox {
+namespace livox
+{
 
 //=======================================================================================
 /** Maximum number of connected devices supported. */
@@ -190,8 +191,10 @@ private:
     DeviceContainer _devices;
     apr_pool_t *_mem_pool;
     DeviceMode _device_mode;
-    boost::function<void(const DeviceInfo *, DeviceEvent)> _connected_cb;
-    boost::function<void(const BroadcastDeviceInfo *info)> _broadcast_cb;
+
+    InfoEventFoo _connected_cb;
+    BrDeviceInfoFoo _broadcast_cb;
+
     boost::mutex _mutex;
 };
 
