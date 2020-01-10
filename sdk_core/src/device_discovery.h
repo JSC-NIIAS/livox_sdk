@@ -41,51 +41,65 @@ namespace livox {
  * DeviceDiscovery listens broadcast message from devices, and proceed handshake
  * if device is in the listening list.
  */
-class DeviceDiscovery : public noncopyable, IOLoop::IOLoopDelegate {
- public:
-  DeviceDiscovery() : sock_(NULL), mem_pool_(NULL), loop_(NULL), comm_port_(NULL) {}
-  bool Init();
-  void Uninit();
+class DeviceDiscovery : public noncopyable, IOLoop::IOLoopDelegate
+{
+    using TupleAprDevice = boost::tuple< apr_pool_t *, apr_time_t, DeviceInfo >;
+    using ConnectingDeviceMap = std::map< apr_socket_t *, TupleAprDevice >;
 
-  /**
+public:
+
+    DeviceDiscovery();
+
+    bool Init();
+    void Uninit();
+
+    /**
    * start the listening of broadcast UDP message.
    * @param loop IOLoop on where DeviceDiscovery runs.
    * @return true if successfully.
    */
-  bool Start(IOLoop *loop);
+    bool Start( IOLoop* loop );
 
-  /**
+    //-----------------------------------------------------------------------------------
+
+    /**
    * IOLoop callback delegate.
    * @param client_data client data passed in IOLoop::AddDelegate
    */
-  void OnData(apr_socket_t *, void *client_data);
-  void OnTimer(apr_time_t now);
+    void OnData( apr_socket_t *, void* client_data );
+    void OnTimer( const apr_time_t now );
 
- private:
-  void OnBroadcast(const CommPacket &packet, apr_sockaddr_t *addr);
+    //-----------------------------------------------------------------------------------
 
- private:
-  /** broadcast listening port number. */
-  static const apr_port_t kListenPort = 55000;
-  /** command port number start offset. */
-  static const apr_port_t kCmdPortOffset = 500;
-  /** data port number start offset. */
-  static const apr_port_t kDataPortOffset = 1000;
+private:
+
+    /** broadcast listening port number. */
+    static const apr_port_t kListenPort = 55000;
+    /** command port number start offset. */
+    static const apr_port_t kCmdPortOffset = 500;
+    /** data port number start offset. */
+    static const apr_port_t kDataPortOffset = 1000;
     /** sensor port number start offset. */
-  static const apr_port_t kSensorPortOffset = 1000;
+    static const apr_port_t kSensorPortOffset = 1000;
 
+    static uint16_t _port_count;
 
-  static uint16_t port_count;
-  apr_socket_t *sock_;
-  apr_pool_t *mem_pool_;
-  IOLoop *loop_;
-  boost::scoped_ptr<CommPort> comm_port_;
-  boost::mutex mutex_;
-  typedef std::map<apr_socket_t *, boost::tuple<apr_pool_t *, apr_time_t, DeviceInfo> > ConnectingDeviceMap;
-  ConnectingDeviceMap connecting_devices_;
+    apr_socket_t *_sock;
+    apr_pool_t *_mem_pool;
+
+    IOLoop *_loop;
+
+    boost::scoped_ptr<CommPort> _comm_port;
+    boost::mutex _mutex;
+
+    ConnectingDeviceMap _connecting_devices;
+
+    //-----------------------------------------------------------------------------------
+
+    void OnBroadcast( const CommPacket& packet, apr_sockaddr_t* addr );
 };
 
-DeviceDiscovery &device_discovery();
+DeviceDiscovery& device_discovery();
 
 }  // namespace livox
 

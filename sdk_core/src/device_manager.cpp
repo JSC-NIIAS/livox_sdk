@@ -37,267 +37,419 @@ using boost::mutex;
 using std::string;
 using std::vector;
 
+//=======================================================================================
+
 namespace livox {
 
-inline bool IsHub(uint8_t mode) {
-  return mode == kDeviceTypeHub;
+//=======================================================================================
+inline bool IsHub( const uint8_t mode )
+{
+    return mode == kDeviceTypeHub;
 }
+//=======================================================================================
 
-inline bool IsLidar(uint8_t mode) {
-  return mode == kDeviceTypeLidarTele || mode == kDeviceTypeLidarMid40 || mode == kDeviceTypeLidarHorizon;
+//=======================================================================================
+inline bool IsLidar( const uint8_t mode )
+{
+    return mode == kDeviceTypeLidarTele ||
+            mode == kDeviceTypeLidarMid40 ||
+            mode == kDeviceTypeLidarHorizon;
 }
+//=======================================================================================
 
-bool DeviceManager::Init() {
-  apr_status_t rv = apr_pool_create(&mem_pool_, NULL);
-  if (rv != APR_SUCCESS) {
-    return false;
-  }
+//=======================================================================================
+DeviceManager::DeviceManager()
+    : _mem_pool     ( NULL            )
+    , _device_mode  ( kDeviceModeNone )
+    , _connected_cb ( NULL            )
+    , _broadcast_cb ( NULL            )
+{
 
-  return true;
 }
+//=======================================================================================
 
-void DeviceManager::Uninit() {
-  broadcast_cb_ = NULL;
-  connected_cb_ = NULL;
-  device_mode_ = kDeviceModeNone;
+//=======================================================================================
+bool DeviceManager::Init()
+{
+    apr_status_t rv = apr_pool_create( &_mem_pool, NULL );
 
-  lock_guard<mutex> lock(mutex_);
-  for (DeviceContainer::iterator ite = devices_.begin(); ite != devices_.end(); ++ite) {
-    ite->clear();
-  }
+    if ( rv != APR_SUCCESS )
+        return false;
 
-  if (mem_pool_) {
-    apr_pool_destroy(mem_pool_);
-    mem_pool_ = NULL;
-  }
+    return true;
 }
+//=======================================================================================
 
-bool DeviceManager::AddDevice(const DeviceInfo &device) {
-  if (device_mode_ == kDeviceModeNone) {
-    if (IsHub(device.type)) {
-      device_mode_ = kDeviceModeHub;
-    } else if (IsLidar(device.type)) {
-      device_mode_ = kDeviceModeLidar;
-    }
-  }
+//=======================================================================================
+void DeviceManager::Uninit()
+{
+    _broadcast_cb = NULL;
+    _connected_cb = NULL;
+    _device_mode = kDeviceModeNone;
 
-  {
-    lock_guard<mutex> lock(mutex_);
-    if (device.handle < devices_.size()) {
-      DetailDeviceInfo &info = devices_[device.handle];
-      info.connected = true;
-      info.info = device;
-    }
-  }
-  return true;
-}
+    lock_guard<mutex> lock(_mutex);
 
-void DeviceManager::RemoveDevice(uint8_t handle) {
-  lock_guard<mutex> lock(mutex_);
-  if (device_mode_ == kDeviceModeHub) {
-    for (DeviceContainer::iterator ite = devices_.begin(); ite != devices_.end(); ++ite) {
-      ite->connected = false;
-    }
-  } else if (device_mode_ == kDeviceModeLidar) {
-    if (handle < devices_.size()) {
-      devices_[handle].connected = false;
-    }
-  }
-  LOG_INFO(" Device {} removed ", (uint16_t)handle);
-}
+    for ( auto ite = _devices.begin(); ite != _devices.end(); ++ite )
+        ite->clear();
 
-void DeviceManager::BroadcastDevices(const BroadcastDeviceInfo *info) {
-  if (broadcast_cb_) {
-    broadcast_cb_(info);
-  }
-}
-
-void DeviceManager::UpdateDevices(const DeviceInfo &device, DeviceEvent type) {
-  if (device_mode_ == kDeviceModeLidar && connected_cb_) {
-    connected_cb_(&device, type);
-  }
-
-  if (device_mode_ == kDeviceModeHub) {
-    if (type == kEventHubConnectionChange) {
-      LOG_DEBUG("Send Query lidars command");
-      command_handler().SendCommand(kHubDefaultHandle,
-                                    kCommandSetHub,
-                                    kCommandIDHubQueryLidarInformation,
-                                    NULL,
-                                    0,
-                                    MakeCommandCallback<DeviceManager, HubQueryLidarInformationResponse>(
-                                        this, &DeviceManager::HubLidarInfomationCallback));
-    } else {
-      if (connected_cb_) {
-        connected_cb_(&device, type);
-      }
-    }
-  }
-}
-
-void DeviceManager::HubLidarInfomationCallback(livox_status status, uint8_t, HubQueryLidarInformationResponse *response) {
-  if (status == kStatusSuccess) {
+    if ( _mem_pool )
     {
-      lock_guard<mutex> lock(mutex_);
-      for (DeviceContainer::iterator ite = devices_.begin(); ite != devices_.end(); ++ite) {
-        if (ite->info.handle != kHubDefaultHandle) {
-          ite->connected = false;
-        }
-      }
-      for (int i = 0; i < response->count; i++) {
-        std::size_t index = (response->device_info_list[i].slot - 1) * 3 + response->device_info_list[i].id - 1;
-        if (index < devices_.size()) {
-          DetailDeviceInfo &info = devices_[index];
-          info.connected = true;
-          strncpy(
-              info.info.broadcast_code, response->device_info_list[i].broadcast_code, sizeof(info.info.broadcast_code));
-          info.info.handle = index;
-        }
-      }
+        apr_pool_destroy( _mem_pool );
+        _mem_pool = NULL;
     }
-    if (connected_cb_) {
-      connected_cb_(&(devices_[kHubDefaultHandle].info), kEventHubConnectionChange);
-    }
-  } else {
-    LOG_ERROR("Failed to query lidars information connected to hub.");
-  }
 }
+//=======================================================================================
 
-void DeviceManager::GetConnectedDevices(vector<DeviceInfo> &devices) {
-  lock_guard<mutex> lock(mutex_);
-  for (DeviceContainer::iterator ite = devices_.begin(); ite != devices_.end(); ++ite) {
-    if (ite->connected == true) {
-      devices.push_back(ite->info);
+//=======================================================================================
+bool DeviceManager::AddDevice( const DeviceInfo& device )
+{
+    if ( _device_mode == kDeviceModeNone )
+    {
+        if ( IsHub( device.type ) )
+            _device_mode = kDeviceModeHub;
+
+        else if ( IsLidar( device.type ) )
+            _device_mode = kDeviceModeLidar;
     }
-  }
-}
 
-bool DeviceManager::AddListeningDevice(const string &broadcast_code, DeviceMode mode, uint8_t &handle) {
-  lock_guard<mutex> lock(mutex_);
-  if (mode == kDeviceModeHub) {
-    handle = kHubDefaultHandle;
-    devices_[kHubDefaultHandle].connected = false;
-    strncpy(devices_[kHubDefaultHandle].info.broadcast_code,
-            broadcast_code.c_str(),
-            sizeof(devices_[kHubDefaultHandle].info.broadcast_code));
-    devices_[kHubDefaultHandle].info.handle = kHubDefaultHandle;
+    lock_guard<mutex> lock( _mutex );
+
+    if ( device.handle < _devices.size() )
+    {
+        DetailDeviceInfo &info = _devices[ device.handle ];
+        info.connected = true;
+        info.info = device;
+    }
+
     return true;
-  }
-
-  for (DeviceContainer::iterator ite = devices_.begin(); ite != devices_.end(); ++ite) {
-    if (strlen(ite->info.broadcast_code) == 0) {
-      handle = ite - devices_.begin();
-      ite->connected = false;
-      strncpy(ite->info.broadcast_code, broadcast_code.c_str(), sizeof(ite->info.broadcast_code));
-      ite->info.handle = handle;
-      return true;
-    } else if (strncmp(ite->info.broadcast_code, broadcast_code.c_str(), sizeof(ite->info.broadcast_code)) == 0) {
-      handle = ite->info.handle;
-      return true;
-    }
-  }
-  return false;
 }
+//=======================================================================================
 
-bool DeviceManager::FindDevice(uint8_t handle, DeviceInfo &info) {
-  lock_guard<mutex> lock(mutex_);
-  if (handle >= devices_.size()) {
+//=======================================================================================
+void DeviceManager::RemoveDevice( const uint8_t handle )
+{
+    lock_guard<mutex> lock( _mutex );
+
+    if ( _device_mode == kDeviceModeHub )
+        for ( auto ite = _devices.begin(); ite != _devices.end(); ++ite )
+            ite->connected = false;
+
+    else if ( _device_mode == kDeviceModeLidar )
+        if ( handle < _devices.size() )
+            _devices[handle].connected = false;
+
+    LOG_INFO( " Device {} removed ", (uint16_t) handle );
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceManager::BroadcastDevices( const BroadcastDeviceInfo* info )
+{
+    if ( _broadcast_cb )
+        _broadcast_cb( info );
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceManager::UpdateDevices( const DeviceInfo& device, const DeviceEvent& type)
+{
+    if ( _device_mode == kDeviceModeLidar && _connected_cb )
+        _connected_cb( &device, type );
+
+    if ( _device_mode == kDeviceModeHub )
+    {
+        if ( type == kEventHubConnectionChange )
+        {
+            LOG_DEBUG( "Send Query lidars command" );
+
+            command_handler().SendCommand( kHubDefaultHandle,
+                                           kCommandSetHub,
+                                           kCommandIDHubQueryLidarInformation,
+                                           NULL,
+                                           0,
+                                           MakeCommandCallback<DeviceManager,
+                                           HubQueryLidarInformationResponse>(
+                                               this,
+                                               &DeviceManager::HubLidarInfomationCallback ) );
+        }
+
+        else if ( _connected_cb )
+            _connected_cb( &device, type );
+    }
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceManager::HubLidarInfomationCallback( const livox_status status,
+                                                const uint8_t,
+                                                HubQueryLidarInformationResponse* response )
+{
+    if ( status != kStatusSuccess )
+    {
+        LOG_ERROR( "Failed to query lidars information connected to hub." );
+        return;
+    }
+
+    lock_guard<mutex> lock( _mutex );
+
+    for ( auto ite = _devices.begin(); ite != _devices.end(); ++ite )
+        if ( ite->info.handle != kHubDefaultHandle )
+            ite->connected = false;
+
+    for ( auto i = 0; i < response->count; i++)
+    {
+        auto index = ( response->device_info_list[i].slot - 1 ) * 3 +
+                     response->device_info_list[i].id - 1;
+
+        if ( index < _devices.size() )
+        {
+            DetailDeviceInfo &info = _devices[index];
+            info.connected = true;
+            strncpy( info.info.broadcast_code,
+                     response->device_info_list[i].broadcast_code,
+                     sizeof( info.info.broadcast_code ) );
+
+            info.info.handle = index;
+        }
+    }
+
+    if ( _connected_cb )
+        _connected_cb( &( _devices[kHubDefaultHandle].info ),
+                       kEventHubConnectionChange );
+}
+//=======================================================================================
+
+//=======================================================================================
+DeviceMode DeviceManager::device_mode() const
+{
+    return _device_mode;
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceManager::GetConnectedDevices( vector<DeviceInfo> &devices )
+{
+    lock_guard<mutex> lock( _mutex );
+
+    for ( auto ite = _devices.begin(); ite != _devices.end(); ++ite )
+        if ( ite->connected == true )
+            devices.push_back( ite->info );
+}
+//=======================================================================================
+
+//=======================================================================================
+bool DeviceManager::AddListeningDevice( const string& broadcast_code,
+                                        const DeviceMode mode,
+                                        uint8_t& handle )
+{
+    lock_guard<mutex> lock(_mutex);
+
+    if ( mode == kDeviceModeHub )
+    {
+        handle = kHubDefaultHandle;
+
+        _devices[kHubDefaultHandle].connected = false;
+
+        strncpy(_devices[kHubDefaultHandle].info.broadcast_code,
+                broadcast_code.c_str(),
+                sizeof( _devices[kHubDefaultHandle].info.broadcast_code ) );
+
+        _devices[kHubDefaultHandle].info.handle = kHubDefaultHandle;
+
+        return true;
+    }
+
+    for ( auto ite = _devices.begin(); ite != _devices.end(); ++ite )
+    {
+        if ( strlen( ite->info.broadcast_code ) == 0 )
+        {
+            handle = ite - _devices.begin();
+            ite->connected = false;
+            strncpy( ite->info.broadcast_code,
+                     broadcast_code.c_str(),
+                     sizeof( ite->info.broadcast_code ) );
+            ite->info.handle = handle;
+
+            return true;
+        }
+
+        else if ( strncmp( ite->info.broadcast_code,
+                           broadcast_code.c_str(),
+                           sizeof( ite->info.broadcast_code ) ) == 0 )
+        {
+            handle = ite->info.handle;
+            return true;
+        }
+    }
+
     return false;
-  }
-  info = devices_[handle].info;
-  return true;
 }
+//=======================================================================================
 
-bool DeviceManager::FindDevice(const string &broadcast_code, DeviceInfo &info) {
-  lock_guard<mutex> lock(mutex_);
-  for (DeviceContainer::iterator ite = devices_.begin(); ite != devices_.end(); ++ite) {
-    if (ite->info.broadcast_code == broadcast_code) {
-      info = ite->info;
-      return true;
-    }
-  }
-  return false;
-}
+//=======================================================================================
+bool DeviceManager::FindDevice( const uint8_t handle, DeviceInfo& info )
+{
+    lock_guard<mutex> lock(_mutex);
 
-bool DeviceManager::IsDeviceConnected(uint8_t handle) {
-  lock_guard<mutex> lock(mutex_);
-  if (handle >= devices_.size()) {
-    return false;
-  }
-  return devices_[handle].connected;
-}
+    if ( handle >= _devices.size() )
+        return false;
 
-void DeviceManager::UpdateDeviceState(uint8_t handle, const HeartbeatResponse &response) {
-  if (handle >= devices_.size()) {
-    return;
-  }
-  bool update = false;
-  DeviceInfo &info = devices_[handle].info;
-  if (info.state != response.state) {
-    LOG_INFO(" Update State to {}, device connect {}", (uint16_t)response.state, devices_[handle].connected);
-    info.state = static_cast<LidarState>(response.state);
-    update = true;
-  }
-  if (info.feature != response.feature) {
-    LOG_INFO(" Update feature to {}, device connect {}", (uint16_t)response.feature, devices_[handle].connected);
-    info.feature = static_cast<LidarFeature>(response.feature);
-    update = true;
-  }
-  if (response.state == kLidarStateInit) {
-    if (info.status.progress != response.error_union.progress) {
-      LOG_INFO(
-          " Update progress {}, device connect {}", (uint16_t)response.error_union.progress, devices_[handle].connected);
-      info.status.progress = response.error_union.progress;
-      update = true;
-    }
-  } else {
-    if (info.status.status_code.error_code != response.error_union.status_code.error_code) {
-      info.status.status_code.error_code = response.error_union.status_code.error_code;
-      update = true;
-    }
-  }
- 
-  if (devices_[handle].connected && update == true) {
-    if (connected_cb_) {
-      connected_cb_(&info, kEventStateChange);
-    }
-  }
-}
+    info = _devices[handle].info;
 
-bool DeviceManager::IsLidarMid40(uint8_t handle) {
-  DeviceInfo lidar_info;
-  bool found = device_manager().FindDevice(handle, lidar_info);
-  if ( found && lidar_info.type == kDeviceTypeLidarMid40) {
     return true;
-  }
-  return false;
 }
+//=======================================================================================
 
-DeviceManager &device_manager() {
-  static DeviceManager lidar_manager;
-  return lidar_manager;
-}
+//=======================================================================================
+bool DeviceManager::FindDevice( const string& broadcast_code, DeviceInfo& info )
+{
+    lock_guard<mutex> lock(_mutex);
 
-void DeviceFound(const DeviceInfo &lidar_data) {
-  device_manager().AddDevice(lidar_data);
-  command_handler().AddDevice(lidar_data);
-  data_handler().AddDevice(lidar_data);
-  if (device_manager().device_mode() == kDeviceModeHub) {
-    device_manager().UpdateDevices(lidar_data, kEventHubConnectionChange);
-  } else {
-    device_manager().UpdateDevices(lidar_data, kEventConnect);
-  }
-}
+    for ( auto ite = _devices.begin(); ite != _devices.end(); ++ite )
+        if ( ite->info.broadcast_code == broadcast_code )
+        {
+            info = ite->info;
+            return true;
+        }
 
-void DeviceRemove(uint8_t handle, DeviceEvent device_event) {
-  DeviceInfo info;
-  bool found = device_manager().FindDevice(handle, info);
-  device_manager().RemoveDevice(handle);
-  command_handler().RemoveDevice(handle);
-  data_handler().RemoveDevice(handle);
-  if (found) {
-    device_manager().UpdateDevices(info, device_event);
-  }
+    return false;
 }
+//=======================================================================================
+
+//=======================================================================================
+bool DeviceManager::IsDeviceConnected( const uint8_t handle )
+{
+    lock_guard<mutex> lock( _mutex );
+
+    if ( handle >= _devices.size() )
+        return false;
+
+    return _devices[handle].connected;
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceManager::SetDeviceConnectedCallback( const InfoEventFoo& cb )
+{
+    _connected_cb = cb;
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceManager::SetDeviceBroadcastCallback( const BrDeviceInfoFoo& cb )
+{
+    _broadcast_cb = cb;
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceManager::UpdateDeviceState( const uint8_t handle,
+                                       const HeartbeatResponse &response )
+{
+    if ( handle >= _devices.size() )
+        return;
+
+    bool update = false;
+
+    DeviceInfo &info = _devices[ handle ].info;
+
+    if ( info.state != response.state )
+    {
+        LOG_INFO( " Update State to {}, device connect {}",
+                  (uint16_t) response.state,
+                  _devices[handle].connected );
+        info.state = static_cast<LidarState>( response.state );
+        update = true;
+    }
+
+    if ( info.feature != response.feature )
+    {
+        LOG_INFO( " Update feature to {}, device connect {}",
+                  (uint16_t) response.feature,
+                  _devices[handle].connected );
+        info.feature = static_cast<LidarFeature>( response.feature );
+        update = true;
+    }
+
+    if ( response.state == kLidarStateInit )
+    {
+        if (info.status.progress != response.error_union.progress)
+        {
+            LOG_INFO( " Update progress {}, device connect {}",
+                      (uint16_t) response.error_union.progress,
+                      _devices[handle].connected );
+            info.status.progress = response.error_union.progress;
+            update = true;
+        }
+    }
+
+    else
+    {
+        if ( info.status.status_code.error_code !=
+             response.error_union.status_code.error_code )
+        {
+            info.status.status_code.error_code = response.error_union.status_code.error_code;
+            update = true;
+        }
+    }
+
+    if ( _devices[handle].connected && update == true )
+        if ( _connected_cb )
+            _connected_cb( &info, kEventStateChange );
+}
+//=======================================================================================
+
+//=======================================================================================
+bool DeviceManager::IsLidarMid40( const uint8_t handle )
+{
+    DeviceInfo lidar_info;
+
+    bool found = device_manager().FindDevice( handle, lidar_info );
+
+    if ( found && lidar_info.type == kDeviceTypeLidarMid40 )
+        return true;
+
+    return false;
+}
+//=======================================================================================
+
+//=======================================================================================
+DeviceManager& device_manager()
+{
+    static DeviceManager lidar_manager;
+    return lidar_manager;
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceFound( const DeviceInfo& lidar_data )
+{
+    device_manager().AddDevice( lidar_data );
+    command_handler().AddDevice( lidar_data );
+    data_handler().AddDevice( lidar_data );
+
+    if ( device_manager().device_mode() == kDeviceModeHub )
+        device_manager().UpdateDevices( lidar_data, kEventHubConnectionChange );
+
+    else
+        device_manager().UpdateDevices( lidar_data, kEventConnect );
+}
+//=======================================================================================
+
+//=======================================================================================
+void DeviceRemove( const uint8_t handle, const DeviceEvent device_event )
+{
+    DeviceInfo info;
+
+    bool found = device_manager().FindDevice( handle, info );
+
+    device_manager().RemoveDevice( handle );
+    command_handler().RemoveDevice( handle );
+    data_handler().RemoveDevice( handle );
+
+    if ( found )
+        device_manager().UpdateDevices(info, device_event);
+}
+//=======================================================================================
 
 }  // namespace livox
