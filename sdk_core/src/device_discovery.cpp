@@ -217,7 +217,8 @@ void DeviceDiscovery::OnBroadcast( const CommPacket& packet, apr_sockaddr_t* add
         return;
 
     BroadcastDeviceInfo device_info;
-    memcpy( (void*)( &device_info ),(void*)( packet.data ),
+    memcpy( (void*)( &device_info ),
+            (void*)( packet.data ),
             ( sizeof( BroadcastDeviceInfo ) - sizeof( device_info.ip ) ) );
 
     string broadcast_code = device_info.broadcast_code;

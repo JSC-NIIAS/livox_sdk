@@ -91,6 +91,8 @@ int LdsLidar::broadcast( std::vector<std::string>& broadcast_code_strs )
         return - 1;
     }
 
+    printf( "--------------------------------------------------" );
+
     LivoxSdkVersion _sdkversion;
     GetLivoxSdkVersion( &_sdkversion );
     printf( "Livox SDK version %d.%d.%d\n",
@@ -98,8 +100,12 @@ int LdsLidar::broadcast( std::vector<std::string>& broadcast_code_strs )
             _sdkversion.minor,
             _sdkversion.patch );
 
+    printf( "--------------------------------------------------" );
+
     SetBroadcastCallback( LdsLidar::OnDeviceBroadcast );
     SetDeviceStateUpdateCallback( LdsLidar::OnDeviceChange );
+
+    printf( "--------------------------------------------------" );
 
     /** Add commandline input broadcast code */
     for ( const auto& input_str: broadcast_code_strs )
@@ -107,6 +113,8 @@ int LdsLidar::broadcast( std::vector<std::string>& broadcast_code_strs )
 
     /** Add local broadcast code */
     LdsLidar::AddLocalBroadcastCode();
+
+    printf( "--------------------------------------------------" );
 
     if ( _whitelist_count )
     {
@@ -189,7 +197,10 @@ void LdsLidar::GetLidarDataCb( const uint8_t handle,
             uint64_t cur_timestamp = *( (uint64_t *)( data->timestamp ) );
 
             if( data ->data_type == kCartesian )
+            {
                 LivoxRawPoint *p_point_data = (LivoxRawPoint *)data->data;
+                auto dddd = p_point_data;
+            }
 
             else if ( data ->data_type == kSpherical )
                 LivoxSpherPoint *p_point_data = (LivoxSpherPoint *)data->data;

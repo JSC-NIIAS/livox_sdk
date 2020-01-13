@@ -52,6 +52,7 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../lidar/main.cpp \
 		../lidar/lds_lidar.cpp \
+		../../sdk_core/src/device.cpp \
 		../../sdk_core/src/device_discovery.cpp \
 		../../sdk_core/src/device_manager.cpp \
 		../../sdk_core/src/livox_sdk.cpp \
@@ -74,6 +75,7 @@ SOURCES       = ../lidar/main.cpp \
 		../../sdk_core/src/third_party/FastCRC/FastCRCsw.cpp 
 OBJECTS       = main.o \
 		lds_lidar.o \
+		device.o \
 		device_discovery.o \
 		device_manager.o \
 		livox_sdk.o \
@@ -247,6 +249,7 @@ DIST          = /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_pre.p
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/qt_config.prf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_post.prf \
+		../lidar/.qmake.stash \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/toolchain.prf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/default_pre.prf \
@@ -277,6 +280,7 @@ DIST          = /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_pre.p
 		../lidar/test_lidar.pro ../lidar/lds_lidar.h \
 		../../sdk_core/include/livox_def.h \
 		../../sdk_core/include/livox_sdk.h \
+		../../sdk_core/src/device.h \
 		../../sdk_core/src/device_discovery.h \
 		../../sdk_core/src/device_manager.h \
 		../../sdk_core/src/command_handler/command_channel.h \
@@ -298,6 +302,7 @@ DIST          = /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_pre.p
 		../../sdk_core/src/comm/sdk_protocol.h \
 		../../sdk_core/src/third_party/FastCRC/FastCRC_tables.hpp ../lidar/main.cpp \
 		../lidar/lds_lidar.cpp \
+		../../sdk_core/src/device.cpp \
 		../../sdk_core/src/device_discovery.cpp \
 		../../sdk_core/src/device_manager.cpp \
 		../../sdk_core/src/livox_sdk.cpp \
@@ -482,6 +487,7 @@ Makefile: ../lidar/test_lidar.pro /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/l
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/qt_config.prf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/linux-g++/qmake.conf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/exclusive_builds.prf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/toolchain.prf \
 		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/default_pre.prf \
@@ -666,6 +672,7 @@ Makefile: ../lidar/test_lidar.pro /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/l
 /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/qt_config.prf:
 /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/linux-g++/qmake.conf:
 /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/exclusive_builds.prf:
 /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/toolchain.prf:
 /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/default_pre.prf:
@@ -711,8 +718,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../lidar/lds_lidar.h ../../sdk_core/include/livox_def.h ../../sdk_core/include/livox_sdk.h ../../sdk_core/src/device_discovery.h ../../sdk_core/src/device_manager.h ../../sdk_core/src/command_handler/command_channel.h ../../sdk_core/src/command_handler/command_handler.h ../../sdk_core/src/command_handler/command_impl.h ../../sdk_core/src/command_handler/hub_command_handler.h ../../sdk_core/src/command_handler/lidar_command_handler.h ../../sdk_core/src/data_handler/data_handler.h ../../sdk_core/src/data_handler/hub_data_handler.h ../../sdk_core/src/data_handler/lidar_data_handler.h ../../sdk_core/src/base/command_callback.h ../../sdk_core/src/base/io_loop.h ../../sdk_core/src/base/io_thread.h ../../sdk_core/src/base/logging.h ../../sdk_core/src/base/network_util.h ../../sdk_core/src/base/noncopyable.h ../../sdk_core/src/base/thread_base.h ../../sdk_core/src/base/util.h ../../sdk_core/src/comm/sdk_protocol.h ../../sdk_core/src/third_party/FastCRC/FastCRC_tables.hpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../lidar/main.cpp ../lidar/lds_lidar.cpp ../../sdk_core/src/device_discovery.cpp ../../sdk_core/src/device_manager.cpp ../../sdk_core/src/livox_sdk.cpp ../../sdk_core/src/command_handler/command_channel.cpp ../../sdk_core/src/command_handler/command_handler.cpp ../../sdk_core/src/command_handler/command_impl.cpp ../../sdk_core/src/command_handler/hub_command_handler.cpp ../../sdk_core/src/command_handler/lidar_command_handler.cpp ../../sdk_core/src/data_handler/data_handler.cpp ../../sdk_core/src/data_handler/hub_data_handler.cpp ../../sdk_core/src/data_handler/lidar_data_handler.cpp ../../sdk_core/src/base/io_loop.cpp ../../sdk_core/src/base/io_thread.cpp ../../sdk_core/src/base/logging.cpp ../../sdk_core/src/base/network_util.cpp ../../sdk_core/src/base/thread_base.cpp ../../sdk_core/src/base/util.cpp ../../sdk_core/src/comm/comm_port.cpp ../../sdk_core/src/comm/sdk_protocol.cpp ../../sdk_core/src/third_party/FastCRC/FastCRCsw.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../lidar/lds_lidar.h ../../sdk_core/include/livox_def.h ../../sdk_core/include/livox_sdk.h ../../sdk_core/src/device.h ../../sdk_core/src/device_discovery.h ../../sdk_core/src/device_manager.h ../../sdk_core/src/command_handler/command_channel.h ../../sdk_core/src/command_handler/command_handler.h ../../sdk_core/src/command_handler/command_impl.h ../../sdk_core/src/command_handler/hub_command_handler.h ../../sdk_core/src/command_handler/lidar_command_handler.h ../../sdk_core/src/data_handler/data_handler.h ../../sdk_core/src/data_handler/hub_data_handler.h ../../sdk_core/src/data_handler/lidar_data_handler.h ../../sdk_core/src/base/command_callback.h ../../sdk_core/src/base/io_loop.h ../../sdk_core/src/base/io_thread.h ../../sdk_core/src/base/logging.h ../../sdk_core/src/base/network_util.h ../../sdk_core/src/base/noncopyable.h ../../sdk_core/src/base/thread_base.h ../../sdk_core/src/base/util.h ../../sdk_core/src/comm/sdk_protocol.h ../../sdk_core/src/third_party/FastCRC/FastCRC_tables.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../lidar/main.cpp ../lidar/lds_lidar.cpp ../../sdk_core/src/device.cpp ../../sdk_core/src/device_discovery.cpp ../../sdk_core/src/device_manager.cpp ../../sdk_core/src/livox_sdk.cpp ../../sdk_core/src/command_handler/command_channel.cpp ../../sdk_core/src/command_handler/command_handler.cpp ../../sdk_core/src/command_handler/command_impl.cpp ../../sdk_core/src/command_handler/hub_command_handler.cpp ../../sdk_core/src/command_handler/lidar_command_handler.cpp ../../sdk_core/src/data_handler/data_handler.cpp ../../sdk_core/src/data_handler/hub_data_handler.cpp ../../sdk_core/src/data_handler/lidar_data_handler.cpp ../../sdk_core/src/base/io_loop.cpp ../../sdk_core/src/base/io_thread.cpp ../../sdk_core/src/base/logging.cpp ../../sdk_core/src/base/network_util.cpp ../../sdk_core/src/base/thread_base.cpp ../../sdk_core/src/base/util.cpp ../../sdk_core/src/comm/comm_port.cpp ../../sdk_core/src/comm/sdk_protocol.cpp ../../sdk_core/src/third_party/FastCRC/FastCRCsw.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -767,6 +774,58 @@ lds_lidar.o: ../lidar/lds_lidar.cpp ../lidar/lds_lidar.h \
 		../../sdk_core/include/livox_def.h \
 		../../sdk_core/include/livox_sdk.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o lds_lidar.o ../lidar/lds_lidar.cpp
+
+device.o: ../../sdk_core/src/device.cpp ../../sdk_core/src/device.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/QObject \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qobject.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qnamespace.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qglobal.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qconfig.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qtcore-config.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qsysinfo.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qlogging.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qflags.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qatomic.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qmutex.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qnumeric.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qversiontagging.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qstring.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qchar.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qbytearray.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qrefcount.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qarraydata.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qlist.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qalgorithms.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qiterator.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qpair.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qstringlist.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qregexp.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qcoreevent.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qmetatype.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/dleliuhin/Qt5.9.2/5.9.2/gcc_64/include/QtCore/qobject_impl.h \
+		../../sdk_core/include/livox_def.h \
+		../../sdk_core/include/livox_sdk.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o device.o ../../sdk_core/src/device.cpp
 
 device_discovery.o: ../../sdk_core/src/device_discovery.cpp ../../sdk_core/src/device_discovery.h \
 		../../sdk_core/src/base/io_thread.h \

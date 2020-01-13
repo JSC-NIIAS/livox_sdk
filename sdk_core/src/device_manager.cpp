@@ -51,9 +51,9 @@ inline bool IsHub( const uint8_t mode )
 //=======================================================================================
 inline bool IsLidar( const uint8_t mode )
 {
-    return mode == kDeviceTypeLidarTele ||
-            mode == kDeviceTypeLidarMid40 ||
-            mode == kDeviceTypeLidarHorizon;
+    return ( mode == kDeviceTypeLidarTele ) ||
+            ( mode == kDeviceTypeLidarMid40 ) ||
+            ( mode == kDeviceTypeLidarHorizon );
 }
 //=======================================================================================
 
@@ -371,31 +371,25 @@ void DeviceManager::UpdateDeviceState( const uint8_t handle,
         update = true;
     }
 
-    if ( response.state == kLidarStateInit )
+    if ( ( response.state == kLidarStateInit ) &&
+         ( info.status.progress != response.error_union.progress ) )
     {
-        if (info.status.progress != response.error_union.progress)
-        {
-            LOG_INFO( " Update progress {}, device connect {}",
-                      (uint16_t) response.error_union.progress,
-                      _devices[handle].connected );
-            info.status.progress = response.error_union.progress;
-            update = true;
-        }
+        LOG_INFO( " Update progress {}, device connect {}",
+                  (uint16_t) response.error_union.progress,
+                  _devices[handle].connected );
+        info.status.progress = response.error_union.progress;
+        update = true;
     }
 
-    else
+    else if ( info.status.status_code.error_code !=
+              response.error_union.status_code.error_code )
     {
-        if ( info.status.status_code.error_code !=
-             response.error_union.status_code.error_code )
-        {
-            info.status.status_code.error_code = response.error_union.status_code.error_code;
-            update = true;
-        }
+        info.status.status_code.error_code = response.error_union.status_code.error_code;
+        update = true;
     }
 
-    if ( _devices[handle].connected && update == true )
-        if ( _connected_cb )
-            _connected_cb( &info, kEventStateChange );
+    if ( ( _devices[handle].connected && update == true ) &&  _connected_cb )
+        _connected_cb( &info, kEventStateChange );
 }
 //=======================================================================================
 

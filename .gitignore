@@ -10,8 +10,10 @@ build/sample
 build/sample_cc
 
 # Qt build temporary files and folders
+sample_cc/build*
 *.pro.user*
 *.pri.*
+*.o
 
 #whitelist
 !build/notes.txt
