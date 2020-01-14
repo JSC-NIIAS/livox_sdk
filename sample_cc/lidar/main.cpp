@@ -34,7 +34,13 @@
 #include <string.h>
 #include <apr_general.h>
 #include <apr_getopt.h>
+
 #include "lds_lidar.h"
+#include "livoxthread.h"
+
+#include <QApplication>
+#include "customscatter.h"
+using namespace QtDataVisualization;
 
 /** Cmdline input broadcast code */
 static std::vector<std::string> cmdline_broadcast_code;
@@ -42,7 +48,7 @@ static std::vector<std::string> cmdline_broadcast_code;
 /** Set the program options.
 * You can input the registered device broadcast code and decide whether to save the log file.
 */
-static int SetProgramOption(int argc, const char *argv[]) {
+static int SetProgramOption(int argc, char *argv[]) {
     apr_status_t rv;
     apr_pool_t *mp = NULL;
     static const apr_getopt_option_t opt_option[] = {
@@ -122,33 +128,20 @@ static int SetProgramOption(int argc, const char *argv[]) {
     return 0;
 }
 
-int main(int argc, const char *argv[])
+int main( int argc, char *argv[] )
 {
     if ( SetProgramOption( argc, argv ) )
         return 0;
 
-    LdsLidar& lidar = LdsLidar::GetInstance();
+    QApplication qapp( argc, argv );
 
-    int ret = lidar.broadcast( cmdline_broadcast_code );
+    CustomScatter scatter;
 
-    if ( !ret )
-        printf( "Init lds lidar success!\n" );
+    LivoxThread lthread( &scatter, cmdline_broadcast_code );
 
-    else
-        printf( "Init lds lidar fail!\n" );
+    lthread.start();
 
-    printf( "Start discovering device.\n" );
-
-#ifdef WIN32
-    Sleep(100000);
-#else
-    //  sleep(100);
-
-    while (true)
-    {
-
-    }
-#endif
+    qapp.exec();
 
     printf("Livox lidar demo end!\n");
 }

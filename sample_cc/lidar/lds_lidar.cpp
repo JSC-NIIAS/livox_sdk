@@ -47,6 +47,8 @@ LdsLidar* g_lidars = nullptr;
 
 //=======================================================================================
 
+QList<LivoxRawPoint> LdsLidar::_pnts;
+
 //=======================================================================================
 LdsLidar::LdsLidar()
 {
@@ -168,6 +170,7 @@ int LdsLidar::DeInitLdsLidar()
 }
 //=======================================================================================
 
+
 //=======================================================================================
 /** Static function in LdsLidar for callback or event process ------------------------------------*/
 
@@ -199,7 +202,9 @@ void LdsLidar::GetLidarDataCb( const uint8_t handle,
             if( data ->data_type == kCartesian )
             {
                 LivoxRawPoint *p_point_data = (LivoxRawPoint *)data->data;
-                auto dddd = p_point_data;
+                auto bufer = data->data;
+                cout << bufer << endl;
+                _pnts.push_back( *p_point_data );
             }
 
             else if ( data ->data_type == kSpherical )
@@ -221,6 +226,9 @@ void LdsLidar::GetLidarDataCb( const uint8_t handle,
                 LivoxImuPoint *p_point_data = (LivoxImuPoint *)data->data;
         }
     }
+
+    if ( _pnts.size() > 10000 )
+        _pnts.clear();
 }
 //=======================================================================================
 
@@ -658,5 +666,21 @@ void LdsLidar::DisableAutoConnectMode()
 bool LdsLidar::IsAutoConnectMode()
 {
     return _auto_connect_mode;
+}
+//=======================================================================================
+
+//=======================================================================================
+void LdsLidar::draw_points( const DrawPloperty& d_prop )
+{
+    if ( !_pnts.empty() )
+        qt::vinvoke_queue( scatter,
+                           d_prop.fn_name.c_str(),
+                           Q_ARG( QList<LivoxRawPoint>, _pnts ),
+                           Q_ARG( DrawPloperty, d_prop ) );
+}
+//=======================================================================================
+QList<LivoxRawPoint> LdsLidar::get_pnts()
+{
+    return _pnts;
 }
 //=======================================================================================

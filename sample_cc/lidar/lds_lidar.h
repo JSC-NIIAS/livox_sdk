@@ -27,11 +27,16 @@
 #ifndef LDS_LIDAR_H_
 #define LDS_LIDAR_H_
 
+#include <iostream>
 #include <memory>
 #include <vector>
 
 #include "livox_def.h"
 #include "livox_sdk.h"
+
+#include <Q3DScatter>
+#include "customscatter.h"
+class Q3DSurface;
 
 //=======================================================================================
 
@@ -75,6 +80,14 @@ typedef struct
     UserConfig config;
 } LidarDevice;
 
+struct QPoint3F
+{
+    float x;
+    float y;
+    float z;
+    float reflectivity;
+};
+
 //=======================================================================================
 
 /**
@@ -83,6 +96,10 @@ typedef struct
 class LdsLidar
 {
 public:
+
+    CustomScatter *scatter = nullptr;
+
+    //-----------------------------------------------------------------------------------
 
     static LdsLidar& GetInstance()
     {
@@ -97,6 +114,12 @@ public:
 
     //-----------------------------------------------------------------------------------
 
+    void draw_points( const DrawPloperty& d_prop );
+
+    QList<LivoxRawPoint> get_pnts();
+
+    //-----------------------------------------------------------------------------------
+
 private:
 
     bool _auto_connect_mode;
@@ -108,6 +131,8 @@ private:
     LidarDevice _lidars[kMaxLidarCount];
 
     uint32_t _data_recveive_count[kMaxLidarCount];
+
+    static QList<LivoxRawPoint> _pnts;
 
     //-----------------------------------------------------------------------------------
 
