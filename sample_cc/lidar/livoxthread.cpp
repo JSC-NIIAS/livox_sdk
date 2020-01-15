@@ -33,7 +33,7 @@ void LivoxThread::run()
     {
         auto pnts = lidar.get_pnts();
 
-        if ( !pnts.empty() )
+        if ( pnts.size() == 10 )
             qt::vinvoke_queue( _scatter,
                                dprop.fn_name.c_str(),
                                Q_ARG( QList<LivoxRawPoint>, pnts ),

@@ -12,11 +12,6 @@
 
 using namespace QtDataVisualization;
 
-using ListVec3d = QList<QVector3D>;
-using MIListVec3d = std::map<int, ListVec3d>;
-
-using QMIListVec3d = QMap<int, QList<QVector3D>>;
-
 //=======================================================================================
 
 Q_DECLARE_METATYPE( QList<QVector3D> )
@@ -70,6 +65,7 @@ class CustomScatter : public Q3DScatter
     private:
 
         QScatter3DSeries* _layer;
+        QScatterDataArray _data;
 
         //-----------------------------------------------------------------------------------
 

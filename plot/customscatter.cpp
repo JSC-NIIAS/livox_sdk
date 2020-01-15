@@ -15,9 +15,9 @@ CustomScatter::CustomScatter()
     this->axisY()->setTitle("Y");
     this->axisZ()->setTitle("Z");
 
-    this->axisX()->setRange( - 20, 20 );
-    this->axisY()->setRange( 0, 200 );
-    this->axisZ()->setRange( 0, 6 );
+    this->axisX()->setRange( - 20000, 20000 );
+    this->axisY()->setRange( - 20000, 20000 );
+    this->axisZ()->setRange( - 20000, 20000 );
 
     this->setShadowQuality( QAbstract3DGraph::ShadowQualityNone );
 
@@ -25,6 +25,15 @@ CustomScatter::CustomScatter()
     //    this->scene()->activeCamera()->setCameraPreset( ( Q3DCamera::CameraPreset ) preset );
 
     this->scene()->activeCamera()->setCameraPosition( - 2, 5, 250.0f );
+
+    _layer = new QScatter3DSeries;
+
+    addSeries( _layer );
+
+    _layer->dataProxy()->addItems( _data );
+    _layer->setBaseColor( qcolors.at( 1 ) );
+    _layer->setItemSize( 0.05 );
+    _layer->setMesh( QAbstract3DSeries::MeshPoint );
 
     this->show();
 }
@@ -42,28 +51,21 @@ CustomScatter::~CustomScatter()
 
 
 //=======================================================================================
+#include <iostream>
 void CustomScatter::plot_pnts( const QList<LivoxRawPoint>& pnts,
                                const DrawPloperty& d_prop )
 {
     if ( pnts.empty() )
         return;
 
-    if ( d_prop.need_gr_clear )
-        clear_series();
-
-    QScatter3DSeries* tmp = new QScatter3DSeries;
-
-    QScatterDataArray data;
+    _data.clear();
 
     for ( const auto& pnt: pnts )
-        data << QVector3D( pnt.x / 100, pnt.y / 100, pnt.z / 100 );
+        _data << QVector3D( pnt.x, pnt.y, pnt.z );
 
-    tmp->dataProxy()->addItems( data );
-    tmp->setBaseColor( qcolors.at( 1 ) );
-    tmp->setItemSize( 0.05 );
-    tmp->setMesh( QAbstract3DSeries::MeshPoint );
+    _layer->dataProxy()->addItems( _data );
 
-    this->addSeries( tmp );
+    std::cout << "plot points" << std::endl;
 
     replot();
 }

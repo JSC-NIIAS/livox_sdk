@@ -227,7 +227,7 @@ void LdsLidar::GetLidarDataCb( const uint8_t handle,
         }
     }
 
-    if ( _pnts.size() > 10000 )
+    if ( _pnts.size() > 10 )
         _pnts.clear();
 }
 //=======================================================================================
