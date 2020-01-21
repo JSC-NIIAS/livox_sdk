@@ -27,9 +27,6 @@
 #include <stdio.h>
 #include <string.h>
 namespace livox {
-const uint8_t kSdkProtocolSof = 0xAA;
-const uint32_t kSdkPacketCrcSize = 4;          // crc32
-const uint32_t kSdkPacketPreambleCrcSize = 2;  // crc16
 
 SdkProtocol::SdkProtocol(uint16_t seed16, uint32_t seed32) : crc16_(seed16), crc32_(seed32) {}
 

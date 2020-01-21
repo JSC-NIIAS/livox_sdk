@@ -31,6 +31,10 @@
 namespace livox {
 typedef enum { kSdkVerNone, kSdkVer0, kSdkVer1 } SdkVersion;
 
+const uint8_t kSdkProtocolSof = 0xAA;
+const uint32_t kSdkPacketCrcSize = 4;          // crc32
+const uint32_t kSdkPacketPreambleCrcSize = 2;  // crc16
+
 #pragma pack(1)
 
 typedef struct {

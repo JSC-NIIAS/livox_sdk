@@ -14,6 +14,7 @@ sample_cc/build*
 *.pro.user*
 *.pri.*
 *.o
+*.txt.user*
 
 #whitelist
 !build/notes.txt
